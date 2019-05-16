@@ -32,27 +32,28 @@ conn = sqlite3.connect("Lab3.db")
 cur = conn.cursor()
 
 with open('dataLab3.json', 'r') as fh:
-    data = json.load(fh)
-print(data)
+    datadd = json.load(fh)
+print(datadd)
 
 cur.execute("DROP TABLE IF EXISTS FIELDNAMES")      
 cur.execute('''CREATE TABLE FIELDNAMES(
-               N1 TEXT,
-               N2 TEXT,
-               N3 TEXT,
-               N4 TEXT,
-               N5 TEXT,
-               N6 TEXT,
-               N7 TEXT)''')
-cur.execute('''INSERT INTO FIELDNAMES 
-            VALUES (?, ?, ?, ?, ?, ?, ?)''', 
-            tuple(data["Computer and Information Research Scientists"].keys()))
+               ID INTEGER NOT NULL PRIMARY KEY UNIQUE,
+               C1 TEXT,
+               C2 TEXT,
+               C3 TEXT,
+               C4 TEXT,
+               C5 TEXT,
+               C6 TEXT,
+               C7 TEXT)''')
+cur.execute('''INSERT INTO FIELDNAMES (C1, C2, C3, C4, C5, C6, C7)
+               VALUES (?, ?, ?, ?, ?, ?, ?)''',tuple(datadd["Computer and Information Research Scientists"].keys()))
 cur.execute("DROP TABLE IF EXISTS DATA")      
 cur.execute("""
             CREATE TABLE DATA(
+            ID INTEGER NOT NULL PRIMARY KEY UNIQUE, 
             Name TEXT UNIQUE ON CONFLICT IGNORE,
             MedianPay INTEGER,
-            EntryLevel TEXT,
+            EntryLevel INT,
             WorkExperience TEXT,
             Training TEXT,
             Jobs INTEGER,
@@ -61,14 +62,17 @@ cur.execute("""
 cur.execute("DROP TABLE IF EXISTS EDUCATION")
 cur.execute("""
             CREATE TABLE EDUCATION(
-            EDUCATION TEXT UNIQUE ON CONFLICT IGNORE)""")
-for k, v in data.items():
-    cur.execute('''INSERT INTO DATA (Name, MedianPay, EntryLevel, WorkExperience, Training, Jobs, Outlook, Change)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)''', (k, ) + tuple(v.values()))   
-    for key, value in v.items():
-        if key == "Typical Entry-Level Education" and value != "None":
-            cur.execute("INSERT INTO EDUCATION (EDUCATION) VALUES (?)", (value, ))
-       
+            ID INTEGER NOT NULL PRIMARY KEY UNIQUE,
+            NAME TEXT UNIQUE ON CONFLICT IGNORE)""")
+
+for name, d in datadd.items():
+    v = tuple(d.values())
+    cur.execute("INSERT INTO EDUCATION (NAME) VALUES(?)", (v[1], ))
+    cur.execute("SELECT ID FROM EDUCATION WHERE NAME = ?", (v[1], ))
+    degree_id = cur.fetchone()[0]
+    
+    cur.execute('''INSERT INTO DATA
+                   (Name, MedianPay, EntryLevel, WorkExperience, Training, Jobs, Outlook, Change)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', (name, v[0], degree_id, v[2], v[3], v[4], v[5], v[6]))
 conn.commit()
 conn.close()
-
