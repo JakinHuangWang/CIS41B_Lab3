@@ -1,4 +1,10 @@
-#importing modules
+"""LAB 2
+Author: Jakin Wang
+OS: Mac OSX
+IDE: Wings IDE
+Date: 05/04/2019
+Description: This Python File is used to Scrape the web and create a json file and then use that json file to create a database
+"""
 import urllib.request as ur
 import requests
 from bs4 import BeautifulSoup 
@@ -33,7 +39,6 @@ cur = conn.cursor()
 
 with open('dataLab3.json', 'r') as fh:
     datadd = json.load(fh)
-print(datadd)
 
 cur.execute("DROP TABLE IF EXISTS FIELDNAMES")      
 cur.execute('''CREATE TABLE FIELDNAMES(
